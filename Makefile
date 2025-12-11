@@ -1,12 +1,11 @@
 # ---- Paths ----
-SRC = src/main.c
-BUILD = chess.out
+RAYGUI_SRC = libs/raygui/src
 RAYLIB_SRC = libs/raylib/src
 RAYLIB_LIB = $(RAYLIB_SRC)/libraylib.a
 
 # ---- Compiler ----
 CC = gcc
-CFLAGS = -std=c99 -Wall -I$(RAYLIB_SRC)
+CFLAGS = -std=c99 -Wall -I$(RAYLIB_SRC) -I$(RAYGUI_SRC)
 LDFLAGS = $(RAYLIB_LIB)
 
 # ---- Platform-specific flags ----
@@ -20,19 +19,19 @@ ifeq ($(UNAME_S), Darwin)  # macOS
     LDFLAGS += -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL -lm
 endif
 
-# ---- Rules ----
-all: $(BUILD)
+# compile
+main test: $(RAYLIB_LIB) build
+	$(CC) src/$@.c -o build/$@.out $(CFLAGS) $(LDFLAGS)
 
-# Link final executable
-$(BUILD): $(RAYLIB_LIB)
-	$(CC) $(SRC) $(LDFLAGS) -I $(RAYLIB_SRC) -o $(BUILD)
-
-# Build raylib first
-$(RAYLIB_SRC)/libraylib.a:
+# build raylib
+$(RAYLIB_LIB):
 	$(MAKE) -C $(RAYLIB_SRC) PLATFORM=PLATFORM_DESKTOP
+
+build:
+	mkdir -p build
 
 # Cleanup
 clean:
-	rm $(BUILD)
+	rm -rf build
 
-.PHONY: all clean
+.PHONY: main test clean
