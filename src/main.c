@@ -57,6 +57,7 @@ int main() {
   SetTargetFPS(30);
   int reset = 0;
   int quit = 0;
+  enum State state = PLAY;
 
   while (!WindowShouldClose() && state != EXIT) {
     Vector2 mouse_pos = GetMousePosition();
@@ -86,11 +87,11 @@ int main() {
       }
     }
     
-    if (IsKeyDown(KEY_SPACE)) {
+    if (IsKeyPressed(KEY_SPACE)) {
       init_board(pieces);
+      puts("Board reset");
     }
     
-    if (
     BeginDrawing();
     ClearBackground(WHITE);
 
@@ -136,7 +137,10 @@ int main() {
 
     // react to gui events
     if (reset) {
-      GuiMessageBox(Rectangle(width / 2, height / 2, 300, 200), "Quit", "Are you sure you want to quit?", "Yes;No");
+      if (GuiMessageBox(Rectangle(width / 2, height / 2, 300, 200), "Reset", "Are you sure you want to reset the board?", "Yes;No")) {
+        init_board(pieces);
+      }
+      reset = 0;
     }
     
     EndDrawing();
@@ -154,35 +158,42 @@ int main() {
 void init_board(struct Piece *pieces) {
   static int texture_loads = 0;
 
-  // if texture had been loaded before
+  // if textures was loaded before
   if (texture_loads > 0) {
+    int tmp[32][2] = {
+      {0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {0, 1}, {1, 1}, {2, 1}, {3, 1}, {4, 1}, {5, 1}, {6, 1}, {7, 1},
+      {0, 1}, {1, 1}, {2, 1}, {3, 1}, {4, 1}, {5, 1}, {6, 1}, {7, 1}, {0, 7}, {1, 7}, {2, 7}, {3, 7}, {4, 7}, {5, 7}, {6, 7}, {7, 7}
+    };
     for (int i = 0; i < 32; i += 1) {
-        UnloadTexture(pieces[i].texture);
+        pieces[i].x = tmp[i][0];
+        pieces[i].y = tmp[i][1];
     }
   }
+  // otherwise load textures for the first time
+  else {
+    struct Piece tmp[32] = {
+      (struct Piece) {Rook, Black, 0, 0, LoadTexture("assets/sprites/rook_b.png")}, (struct Piece) {Knight, Black, 1, 0, LoadTexture("assets/sprites/knight_b.png")},
+      (struct Piece) {Bishop, Black, 2, 0, LoadTexture("assets/sprites/rook_b.png")}, (struct Piece) {Queen, Black, 3, 0, LoadTexture("assets/sprites/queen_b.png")},
+      (struct Piece) {King, Black, 4, 0, LoadTexture("assets/sprites/king_b.png")}, (struct Piece) {Bishop, Black, 5, 0, LoadTexture("assets/sprites/bishop_b.png")},
+      (struct Piece) {Knight, Black, 6, 0, LoadTexture("assets/sprites/knight_b.png")}, (struct Piece) {Rook, Black, 7, 0, LoadTexture("assets/sprites/rook_b.png")},
+      (struct Piece) {Pawn, Black, 0, 1, LoadTexture("assets/sprites/pawn_b.png")}, (struct Piece) {Pawn, Black, 1, 1, LoadTexture("assets/sprites/pawn_b.png")},
+      (struct Piece) {Pawn, Black, 2, 1, LoadTexture("assets/sprites/pawn_b.png")}, (struct Piece) {Pawn, Black, 3, 1, LoadTexture("assets/sprites/pawn_b.png")},
+      (struct Piece) {Pawn, Black, 4, 1, LoadTexture("assets/sprites/pawn_b.png")}, (struct Piece) {Pawn, Black, 5, 1, LoadTexture("assets/sprites/pawn_b.png")},
+      (struct Piece) {Pawn, Black, 6, 1, LoadTexture("assets/sprites/pawn_b.png")}, (struct Piece) {Pawn, Black, 7, 1, LoadTexture("assets/sprites/pawn_b.png")},
+      (struct Piece) {Rook, White, 0, 7, LoadTexture("assets/sprites/rook_w.png")}, (struct Piece) {Knight, White, 1, 7, LoadTexture("assets/sprites/knight_w.png")},
+      (struct Piece) {Bishop, White, 2, 7, LoadTexture("assets/sprites/bishop_w.png")}, (struct Piece) {Queen, White, 3, 7, LoadTexture("assets/sprites/queen_w.png")},
+      (struct Piece) {King, White, 4, 7, LoadTexture("assets/sprites/king_w.png")}, (struct Piece) {Bishop, White, 5, 7, LoadTexture("assets/sprites/bishop_w.png")},
+      (struct Piece) {Knight, White, 6, 7, LoadTexture("assets/sprites/knight_w.png")}, (struct Piece) {Rook, White, 7, 7, LoadTexture("assets/sprites/rook_w.png")},
+      (struct Piece) {Pawn, White, 0, 6, LoadTexture("assets/sprites/pawn_w.png")}, (struct Piece) {Pawn, White, 1, 6, LoadTexture("assets/sprites/pawn_w.png")},
+      (struct Piece) {Pawn, White, 2, 6, LoadTexture("assets/sprites/pawn_w.png")}, (struct Piece) {Pawn, White, 3, 6, LoadTexture("assets/sprites/pawn_w.png")},
+      (struct Piece) {Pawn, White, 4, 6, LoadTexture("assets/sprites/pawn_w.png")}, (struct Piece) {Pawn, White, 5, 6, LoadTexture("assets/sprites/pawn_w.png")},
+      (struct Piece) {Pawn, White, 6, 6, LoadTexture("assets/sprites/pawn_w.png")}, (struct Piece) {Pawn, White, 7, 6, LoadTexture("assets/sprites/pawn_w.png")}
+    };
   
-  struct Piece tmp[32] = {
-    (struct Piece) {Rook, Black, 0, 0, LoadTexture("assets/sprites/rook_b.png")}, (struct Piece) {Knight, Black, 1, 0, LoadTexture("assets/sprites/knight_b.png")},
-    (struct Piece) {Bishop, Black, 2, 0, LoadTexture("assets/sprites/rook_b.png")}, (struct Piece) {Queen, Black, 3, 0, LoadTexture("assets/sprites/queen_b.png")},
-    (struct Piece) {King, Black, 4, 0, LoadTexture("assets/sprites/king_b.png")}, (struct Piece) {Bishop, Black, 5, 0, LoadTexture("assets/sprites/bishop_b.png")},
-    (struct Piece) {Knight, Black, 6, 0, LoadTexture("assets/sprites/knight_b.png")}, (struct Piece) {Rook, Black, 7, 0, LoadTexture("assets/sprites/rook_b.png")},
-    (struct Piece) {Pawn, Black, 0, 1, LoadTexture("assets/sprites/pawn_b.png")}, (struct Piece) {Pawn, Black, 1, 1, LoadTexture("assets/sprites/pawn_b.png")},
-    (struct Piece) {Pawn, Black, 2, 1, LoadTexture("assets/sprites/pawn_b.png")}, (struct Piece) {Pawn, Black, 3, 1, LoadTexture("assets/sprites/pawn_b.png")},
-    (struct Piece) {Pawn, Black, 4, 1, LoadTexture("assets/sprites/pawn_b.png")}, (struct Piece) {Pawn, Black, 5, 1, LoadTexture("assets/sprites/pawn_b.png")},
-    (struct Piece) {Pawn, Black, 6, 1, LoadTexture("assets/sprites/pawn_b.png")}, (struct Piece) {Pawn, Black, 7, 1, LoadTexture("assets/sprites/pawn_b.png")},
-    (struct Piece) {Rook, White, 0, 7, LoadTexture("assets/sprites/rook_w.png")}, (struct Piece) {Knight, White, 1, 7, LoadTexture("assets/sprites/knight_w.png")},
-    (struct Piece) {Bishop, White, 2, 7, LoadTexture("assets/sprites/bishop_w.png")}, (struct Piece) {Queen, White, 3, 7, LoadTexture("assets/sprites/queen_w.png")},
-    (struct Piece) {King, White, 4, 7, LoadTexture("assets/sprites/king_w.png")}, (struct Piece) {Bishop, White, 5, 7, LoadTexture("assets/sprites/bishop_w.png")},
-    (struct Piece) {Knight, White, 6, 7, LoadTexture("assets/sprites/knight_w.png")}, (struct Piece) {Rook, White, 7, 7, LoadTexture("assets/sprites/rook_w.png")},
-    (struct Piece) {Pawn, White, 0, 6, LoadTexture("assets/sprites/pawn_w.png")}, (struct Piece) {Pawn, White, 1, 6, LoadTexture("assets/sprites/pawn_w.png")},
-    (struct Piece) {Pawn, White, 2, 6, LoadTexture("assets/sprites/pawn_w.png")}, (struct Piece) {Pawn, White, 3, 6, LoadTexture("assets/sprites/pawn_w.png")},
-    (struct Piece) {Pawn, White, 4, 6, LoadTexture("assets/sprites/pawn_w.png")}, (struct Piece) {Pawn, White, 5, 6, LoadTexture("assets/sprites/pawn_w.png")},
-    (struct Piece) {Pawn, White, 6, 6, LoadTexture("assets/sprites/pawn_w.png")}, (struct Piece) {Pawn, White, 7, 6, LoadTexture("assets/sprites/pawn_w.png")}
-  };
+    memcpy(pieces, tmp, sizeof(tmp));
+  }
   
   texture_loads += 1;
-  printf("Textures loaded %d times", texture_loads);
-  memcpy(pieces, tmp, sizeof(tmp));
 }
 
 void setup_board(struct Piece *pieces, struct Piece *board[8][8]) {
